@@ -57,7 +57,7 @@ export class AuthService {
         throw new BadRequestException('User already exist');
       }
 
-      const hashed: string = (await bcrypt.hash(dto.password, 10)) as string;
+      const hashed: string = await bcrypt.hash(dto.password, 10);
 
       return await new this.userModel({ ...dto, password: hashed }).save();
     } catch {

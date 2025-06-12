@@ -6,3 +6,7 @@ export type JwtPayload = {
 export type RequestWithPayload = {
   user?: JwtPayload;
 };
+
+export type RequestWithUser = {
+  user: JwtPayload;
+};

@@ -8,6 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Response } from 'src/types/Response';
 
 export class UsersService {
   constructor(
@@ -60,7 +61,7 @@ export class UsersService {
     }
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<Response> {
     try {
       const user = await this.userModel.findById(id);
 

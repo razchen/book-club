@@ -38,10 +38,13 @@ export class BookClubsService {
     owner: string,
   ): Promise<BookClubDocument> {
     try {
-      return await new this.bookClubModel({ ...dto, owner }).save();
+      return await new this.bookClubModel({
+        ...dto,
+        owner: new Types.ObjectId(owner),
+      }).save();
     } catch (err) {
       console.error(err);
-      throw new InternalServerErrorException('Failed to create book');
+      throw new InternalServerErrorException('Failed to create book club');
     }
   }
 
@@ -69,7 +72,7 @@ export class BookClubsService {
         };
       });
     } catch {
-      throw new InternalServerErrorException('Failed to fetch books');
+      throw new InternalServerErrorException('Failed to fetch book clubs');
     }
   }
 
@@ -81,7 +84,7 @@ export class BookClubsService {
 
       return bookClub;
     } catch {
-      throw new InternalServerErrorException('Failed to fetch book');
+      throw new InternalServerErrorException('Failed to fetch book club');
     }
   }
 
@@ -95,8 +98,6 @@ export class BookClubsService {
 
       if (!bookClub) throw new NotFoundException();
 
-      if (bookClub.owner.toString() !== owner) throw new BadRequestException();
-
       const updated = await this.bookClubModel.findByIdAndUpdate(id, dto, {
         new: true,
       });
@@ -105,7 +106,7 @@ export class BookClubsService {
 
       return updated;
     } catch {
-      throw new InternalServerErrorException('Failed to update book');
+      throw new InternalServerErrorException('Failed to update book club');
     }
   }
 
@@ -206,49 +207,69 @@ export class BookClubsService {
     }
   }
 
-  async addUser(bookClubId: string, userId: string) {
-    const bookClub = await this.bookClubModel.findById(bookClubId);
+  async addUser(bookClubId: string, userId: string): Promise<BookClubDocument> {
+    try {
+      const bookClub = await this.bookClubModel.findById(bookClubId);
 
-    if (!bookClub) throw new NotFoundException();
+      if (!bookClub) throw new NotFoundException();
 
-    const exists = await this.membershipModel.exists({
-      bookClub: new Types.ObjectId(bookClubId),
-      user: new Types.ObjectId(userId),
-    });
-
-    if (!exists) {
-      await new this.membershipModel({
-        bookClub: new Types.ObjectId(bookClubId),
-        user: new Types.ObjectId(userId),
-      }).save();
-    }
-
-    return await this.bookClubModel.findById(bookClubId).populate({
-      path: 'users',
-      populate: { path: 'user' },
-    });
-  }
-
-  async removeUser(bookClubId: string, userId: string) {
-    const bookClub = await this.bookClubModel.findById(bookClubId);
-
-    if (!bookClub) throw new NotFoundException();
-
-    const exists = await this.membershipModel.exists({
-      bookClub: new Types.ObjectId(bookClubId),
-      user: new Types.ObjectId(userId),
-    });
-
-    if (exists) {
-      await this.membershipModel.deleteOne({
+      const exists = await this.membershipModel.exists({
         bookClub: new Types.ObjectId(bookClubId),
         user: new Types.ObjectId(userId),
       });
-    }
 
-    return await this.bookClubModel.findById(bookClubId).populate({
-      path: 'users',
-      populate: { path: 'user' },
-    });
+      if (!exists) {
+        await new this.membershipModel({
+          bookClub: new Types.ObjectId(bookClubId),
+          user: new Types.ObjectId(userId),
+        }).save();
+      }
+
+      const populated = await this.bookClubModel.findById(bookClubId).populate({
+        path: 'users',
+        populate: { path: 'user' },
+      });
+
+      if (!populated)
+        throw new NotFoundException('Book club not found after update');
+
+      return populated;
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async removeUser(
+    bookClubId: string,
+    userId: string,
+  ): Promise<BookClubDocument> {
+    try {
+      const bookClub = await this.bookClubModel.findById(bookClubId);
+
+      if (!bookClub) throw new NotFoundException();
+
+      const exists = await this.membershipModel.exists({
+        bookClub: new Types.ObjectId(bookClubId),
+        user: new Types.ObjectId(userId),
+      });
+
+      if (exists) {
+        await this.membershipModel.deleteOne({
+          bookClub: new Types.ObjectId(bookClubId),
+          user: new Types.ObjectId(userId),
+        });
+      }
+
+      const populated = await this.bookClubModel.findById(bookClubId).populate({
+        path: 'users',
+        populate: { path: 'user' },
+      });
+
+      if (!populated) throw new NotFoundException();
+
+      return populated;
+    } catch {
+      throw new InternalServerErrorException();
+    }
   }
 }

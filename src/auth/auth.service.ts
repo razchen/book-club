@@ -23,7 +23,7 @@ export class AuthService {
 
   login(user: UserDocument) {
     try {
-      const payload = { id: user._id, email: user.email };
+      const payload = { id: user._id, email: user.email, role: user.role };
       return {
         accessToken: this.jwtService.sign(payload, {
           secret: this.configService.get<string>('JWT_SECRET') || '',
@@ -38,7 +38,7 @@ export class AuthService {
     try {
       const user = await this.userModel
         .findOne({ email })
-        .select(['email', 'password']);
+        .select(['email', 'password', 'role']);
 
       if (user && (await bcrypt.compare(password, user.password))) {
         return user;
@@ -61,7 +61,11 @@ export class AuthService {
 
       const hashed: string = await bcrypt.hash(dto.password, 10);
 
-      return await new this.userModel({ ...dto, password: hashed }).save();
+      return await new this.userModel({
+        ...dto,
+        password: hashed,
+        role: 'user',
+      }).save();
     } catch {
       throw new InternalServerErrorException('Registration failed');
     }

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -14,11 +15,15 @@ import { CreateBookClubDto } from './dto/create-book-club.dto';
 import { UpdateBookClubDto } from './dto/update-book-club.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RequestWithUser } from 'src/types/Auth';
+import { Action, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 
 @Controller('book-clubs')
 @UseGuards(JwtAuthGuard)
 export class BookClubsController {
-  constructor(private bookClubsService: BookClubsService) {}
+  constructor(
+    private readonly bookClubsService: BookClubsService,
+    private readonly caslAbilityFactory: CaslAbilityFactory,
+  ) {}
 
   @Post()
   async create(
@@ -45,6 +50,13 @@ export class BookClubsController {
     @Body() dto: UpdateBookClubDto,
     @Request() req: RequestWithUser,
   ) {
+    const bookClub = await this.bookClubsService.findOne(id);
+    const ability = this.caslAbilityFactory.createForUser(req.user);
+
+    if (!ability.can(Action.Update, bookClub)) {
+      throw new ForbiddenException('You do not have the permission');
+    }
+
     const userId: string = req.user.id;
     return this.bookClubsService.update(id, dto, userId);
   }

@@ -8,10 +8,11 @@ import {
   BookClubBookSchema,
 } from './schema/book-club-book.schema';
 import { Membership, MembershipSchema } from './schema/membership.schema';
+import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 
 @Module({
   controllers: [BookClubsController],
-  providers: [BookClubsService],
+  providers: [BookClubsService, CaslAbilityFactory],
   imports: [
     MongooseModule.forFeature([
       { name: BookClub.name, schema: BookClubSchema },

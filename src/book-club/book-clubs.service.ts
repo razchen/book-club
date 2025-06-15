@@ -5,6 +5,7 @@ import { CreateBookClubDto } from './dto/create-book-club.dto';
 import {
   BadRequestException,
   HttpStatus,
+  Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,17 +16,21 @@ import {
   BookClubBookDocument,
 } from './schema/book-club-book.schema';
 import { Book } from 'src/book/schema/book.schema';
+import { Membership, MembershipDocument } from './schema/membership.schema';
 
 type PopulatedBookClub = Omit<BookClub, 'books'> & {
   books: Book[];
 };
 
+@Injectable()
 export class BookClubsService {
   constructor(
     @InjectModel(BookClub.name)
     private readonly bookClubModel: Model<BookClubDocument>,
     @InjectModel(BookClubBook.name)
     private readonly bookClubBookModel: Model<BookClubBookDocument>,
+    @InjectModel(Membership.name)
+    private readonly membershipModel: Model<MembershipDocument>,
   ) {}
 
   async create(
@@ -42,10 +47,16 @@ export class BookClubsService {
 
   async findAll(): Promise<PopulatedBookClub[]> {
     try {
-      const bookClubs = await this.bookClubModel.find().populate({
-        path: 'books',
-        populate: { path: 'book' },
-      });
+      const bookClubs = await this.bookClubModel
+        .find()
+        .populate({
+          path: 'books',
+          populate: { path: 'book' },
+        })
+        .populate({
+          path: 'users',
+          populate: { path: 'user' },
+        });
 
       return bookClubs.map((club) => {
         const c = club.toObject() as unknown as BookClub & {
@@ -164,8 +175,6 @@ export class BookClubsService {
     try {
       const bookClub = await this.bookClubModel.findById(bookClubId);
 
-      console.log('bookClub', bookClub);
-
       if (!bookClub) throw new NotFoundException();
 
       if (bookClub.owner.toString() !== owner) throw new BadRequestException();
@@ -174,8 +183,6 @@ export class BookClubsService {
         bookClub: new Types.ObjectId(bookClubId),
         book: new Types.ObjectId(bookId),
       });
-
-      console.log('exists', exists);
 
       if (exists) {
         await this.bookClubBookModel.deleteOne({
@@ -197,5 +204,51 @@ export class BookClubsService {
       console.error(err);
       throw new InternalServerErrorException('Failed to remove book');
     }
+  }
+
+  async addUser(bookClubId: string, userId: string) {
+    const bookClub = await this.bookClubModel.findById(bookClubId);
+
+    if (!bookClub) throw new NotFoundException();
+
+    const exists = await this.membershipModel.exists({
+      bookClub: new Types.ObjectId(bookClubId),
+      user: new Types.ObjectId(userId),
+    });
+
+    if (!exists) {
+      await new this.membershipModel({
+        bookClub: new Types.ObjectId(bookClubId),
+        user: new Types.ObjectId(userId),
+      }).save();
+    }
+
+    return await this.bookClubModel.findById(bookClubId).populate({
+      path: 'users',
+      populate: { path: 'user' },
+    });
+  }
+
+  async removeUser(bookClubId: string, userId: string) {
+    const bookClub = await this.bookClubModel.findById(bookClubId);
+
+    if (!bookClub) throw new NotFoundException();
+
+    const exists = await this.membershipModel.exists({
+      bookClub: new Types.ObjectId(bookClubId),
+      user: new Types.ObjectId(userId),
+    });
+
+    if (exists) {
+      await this.membershipModel.deleteOne({
+        bookClub: new Types.ObjectId(bookClubId),
+        user: new Types.ObjectId(userId),
+      });
+    }
+
+    return await this.bookClubModel.findById(bookClubId).populate({
+      path: 'users',
+      populate: { path: 'user' },
+    });
   }
 }

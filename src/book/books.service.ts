@@ -4,12 +4,14 @@ import { Model } from 'mongoose';
 import { CreateBookDto } from './dto/create-book.dto';
 import {
   HttpStatus,
+  Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Response } from 'src/types/Response';
 
+@Injectable()
 export class BooksService {
   constructor(
     @InjectModel(Book.name) private readonly bookModel: Model<BookDocument>,

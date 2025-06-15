@@ -7,6 +7,7 @@ import {
   BookClubBook,
   BookClubBookSchema,
 } from './schema/book-club-book.schema';
+import { Membership, MembershipSchema } from './schema/membership.schema';
 
 @Module({
   controllers: [BookClubsController],
@@ -15,6 +16,7 @@ import {
     MongooseModule.forFeature([
       { name: BookClub.name, schema: BookClubSchema },
       { name: BookClubBook.name, schema: BookClubBookSchema },
+      { name: Membership.name, schema: MembershipSchema },
     ]),
   ],
 })

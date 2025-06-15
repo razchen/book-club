@@ -19,5 +19,11 @@ BookClubSchema.virtual('books', {
   foreignField: 'bookClub',
 });
 
+BookClubSchema.virtual('users', {
+  ref: 'Membership',
+  localField: '_id',
+  foreignField: 'bookClub',
+});
+
 BookClubSchema.set('toObject', { virtuals: true });
 BookClubSchema.set('toJSON', { virtuals: true });

@@ -5,6 +5,7 @@ import { registerDto } from './dto/register.dto';
 import {
   BadRequestException,
   Body,
+  Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
 
@@ -12,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
+@Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,

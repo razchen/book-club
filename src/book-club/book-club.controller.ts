@@ -74,4 +74,16 @@ export class BookClubsController {
     const userId: string = req.user.id;
     return await this.bookClubsService.removeBook(id, bookId, userId);
   }
+
+  @Post(':id/add-user')
+  async addUser(@Param('id') id: string, @Request() req: RequestWithUser) {
+    const userId: string = req.user.id;
+    return await this.bookClubsService.addUser(id, userId);
+  }
+
+  @Delete(':id/remove-user')
+  async removeUser(@Param('id') id: string, @Request() req: RequestWithUser) {
+    const userId: string = req.user.id;
+    return await this.bookClubsService.removeUser(id, userId);
+  }
 }

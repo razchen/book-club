@@ -4,12 +4,14 @@ import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import {
   HttpStatus,
+  Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'src/types/Response';
 
+@Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,

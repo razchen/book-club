@@ -13,10 +13,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserDocument } from './schema/user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'src/types/Response';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Role } from 'src/types/Auth';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.Admin)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

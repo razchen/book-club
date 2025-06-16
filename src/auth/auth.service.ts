@@ -12,6 +12,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Role } from 'src/types/Auth';
 
 @Injectable()
 export class AuthService {
@@ -64,7 +65,7 @@ export class AuthService {
       return await new this.userModel({
         ...dto,
         password: hashed,
-        role: 'user',
+        role: Role.User,
       }).save();
     } catch {
       throw new InternalServerErrorException('Registration failed');

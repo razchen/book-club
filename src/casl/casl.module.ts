@@ -5,6 +5,7 @@ import {
   BookClub,
   BookClubSchema,
 } from 'src/book-club/schema/book-club.schema';
+import { CaslGuard } from './casl.guard';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import {
       { name: BookClub.name, schema: BookClubSchema },
     ]),
   ],
-  providers: [CaslAbilityFactory],
+  providers: [CaslAbilityFactory, CaslGuard],
   exports: [CaslAbilityFactory],
 })
 export class CaslModule {}

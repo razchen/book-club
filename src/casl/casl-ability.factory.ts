@@ -13,7 +13,7 @@ import {
   BookClub,
   BookClubDocument,
 } from 'src/book-club/schema/book-club.schema';
-import { JwtPayload } from 'src/types/Auth';
+import { JwtPayload, Role } from 'src/types/Auth';
 import { User } from 'src/user/schema/user.schema';
 
 export enum Action {
@@ -51,7 +51,7 @@ export class CaslAbilityFactory {
     can([Action.Update, Action.Delete], this.bookClubModel, { owner: ownerId });
 
     // Admins
-    if (user.role === 'admin') {
+    if (user.role === Role.Admin) {
       can(Action.Manage, 'all');
     }
 

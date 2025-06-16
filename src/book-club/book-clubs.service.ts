@@ -88,11 +88,7 @@ export class BookClubsService {
     }
   }
 
-  async update(
-    id: string,
-    dto: UpdateBookClubDto,
-    owner: string,
-  ): Promise<BookClubDocument> {
+  async update(id: string, dto: UpdateBookClubDto): Promise<BookClubDocument> {
     try {
       const bookClub = await this.bookClubModel.findById(id);
 
@@ -110,13 +106,11 @@ export class BookClubsService {
     }
   }
 
-  async delete(id: string, owner: string): Promise<Response> {
+  async delete(id: string): Promise<Response> {
     try {
       const bookClub = await this.bookClubModel.findById(id);
 
       if (!bookClub) throw new NotFoundException();
-
-      if (bookClub.owner.toString() !== owner) throw new BadRequestException();
 
       await this.bookClubModel.findByIdAndDelete(id);
 
@@ -129,17 +123,11 @@ export class BookClubsService {
     }
   }
 
-  async addBook(
-    bookClubId: string,
-    bookId: string,
-    owner: string,
-  ): Promise<BookClub> {
+  async addBook(bookClubId: string, bookId: string): Promise<BookClub> {
     try {
       const bookClub = await this.bookClubModel.findById(bookClubId);
 
       if (!bookClub) throw new NotFoundException();
-
-      if (bookClub.owner.toString() !== owner) throw new BadRequestException();
 
       const exists = await this.bookClubBookModel.exists({
         bookClub: new Types.ObjectId(bookClubId),
@@ -171,14 +159,11 @@ export class BookClubsService {
   async removeBook(
     bookClubId: string,
     bookId: string,
-    owner: string,
   ): Promise<BookClubDocument> {
     try {
       const bookClub = await this.bookClubModel.findById(bookClubId);
 
       if (!bookClub) throw new NotFoundException();
-
-      if (bookClub.owner.toString() !== owner) throw new BadRequestException();
 
       const exists = await this.bookClubBookModel.exists({
         bookClub: new Types.ObjectId(bookClubId),

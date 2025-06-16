@@ -11,7 +11,9 @@ import {
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Role } from 'src/types/Auth';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('books')
 @UseGuards(JwtAuthGuard)
@@ -38,6 +40,7 @@ export class BooksController {
     return this.booksService.update(id, dto);
   }
 
+  @Roles(Role.Admin)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.booksService.delete(id);

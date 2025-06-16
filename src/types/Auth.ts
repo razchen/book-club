@@ -1,4 +1,7 @@
-export type Role = 'user' | 'admin';
+export enum Role {
+  User = 'user',
+  Admin = 'admin',
+}
 
 export type JwtPayload = {
   id: string;

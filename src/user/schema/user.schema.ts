@@ -9,7 +9,7 @@ export class User {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true, default: 'user' })
+  @Prop({ required: true, default: Role.User })
   role: Role;
 
   @Prop({ unique: true, required: true })

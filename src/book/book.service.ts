@@ -2,12 +2,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Book, BookDocument } from './schema/book.schema';
 import { Model } from 'mongoose';
 import { CreateBookDto } from './dto/create-book.dto';
-import {
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Response } from 'src/types/Response';
 
@@ -18,60 +13,40 @@ export class BookService {
   ) {}
 
   async create(dto: CreateBookDto): Promise<BookDocument> {
-    try {
-      return await new this.bookModel(dto).save();
-    } catch {
-      throw new InternalServerErrorException('Failed to create book');
-    }
+    return await new this.bookModel(dto).save();
   }
 
   async findAll(): Promise<BookDocument[]> {
-    try {
-      return await this.bookModel.find();
-    } catch {
-      throw new InternalServerErrorException('Failed to fetch books');
-    }
+    return await this.bookModel.find();
   }
 
-  async findOne(id: string): Promise<BookDocument> {
-    try {
-      const book = await this.bookModel.findById(id);
+  async findOne(id: string): Promise<BookDocument | null> {
+    const book = await this.bookModel.findById(id);
 
-      if (!book) throw new NotFoundException();
-      return book;
-    } catch {
-      throw new InternalServerErrorException('Failed to fetch book');
-    }
+    if (!book) throw new NotFoundException();
+    return book;
   }
 
   async update(id: string, dto: UpdateBookDto): Promise<BookDocument> {
-    try {
-      const book = await this.bookModel.findByIdAndUpdate(id, dto, {
-        new: true,
-      });
+    const book = await this.bookModel.findByIdAndUpdate(id, dto, {
+      new: true,
+    });
 
-      if (!book) throw new NotFoundException();
+    if (!book) throw new NotFoundException();
 
-      return book;
-    } catch {
-      throw new InternalServerErrorException('Failed to update book');
-    }
+    return book;
   }
 
   async delete(id: string): Promise<Response> {
-    try {
-      const book = await this.bookModel.findById(id);
+    const book = await this.bookModel.findById(id);
 
-      if (!book) throw new NotFoundException();
+    if (!book) throw new NotFoundException();
 
-      await this.bookModel.findByIdAndDelete(id);
+    await this.bookModel.findByIdAndDelete(id);
 
-      return {
-        message: 'Book deleted',
-        code: HttpStatus.NO_CONTENT,
-      };
-    } catch {
-      throw new InternalServerErrorException();
-    }
+    return {
+      message: 'Book deleted',
+      code: HttpStatus.NO_CONTENT,
+    };
   }
 }

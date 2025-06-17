@@ -53,23 +53,19 @@ export class AuthService {
   }
 
   async register(dto: registerDto) {
-    try {
-      const { email } = dto;
+    const { email } = dto;
 
-      const user = await this.userModel.findOne({ email });
-      if (user) {
-        throw new BadRequestException('User already exist');
-      }
-
-      const hashed: string = await bcrypt.hash(dto.password, 10);
-
-      return await new this.userModel({
-        ...dto,
-        password: hashed,
-        roles: [Roles.user],
-      }).save();
-    } catch {
-      throw new InternalServerErrorException('Registration failed');
+    const user = await this.userModel.findOne({ email });
+    if (user) {
+      throw new BadRequestException('User already exist');
     }
+
+    const hashed: string = await bcrypt.hash(dto.password, 10);
+
+    return await new this.userModel({
+      ...dto,
+      password: hashed,
+      roles: [Roles.user],
+    }).save();
   }
 }

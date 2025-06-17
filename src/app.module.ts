@@ -9,6 +9,8 @@ import { BookModule } from './book/book.module';
 import { BookClubModule } from './book-club/book-club.module';
 import { CaslModule } from 'nest-casl';
 import { Roles } from './app.roles';
+import { GlobalExceptionFilter } from './filters/global-exception.filter';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -31,6 +33,12 @@ import { Roles } from './app.roles';
     BookClubModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

@@ -17,7 +17,7 @@ import {
 import { Membership, MembershipDocument } from './schema/membership.schema';
 
 @Injectable()
-export class BookClubsService {
+export class BookClubService {
   constructor(
     @InjectModel(BookClub.name)
     private readonly bookClubModel: Model<BookClubDocument>,

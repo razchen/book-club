@@ -8,7 +8,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'src/types/Response';
@@ -19,13 +19,13 @@ import { plainToInstance } from 'class-transformer';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, AccessGuard)
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @UseAbility(Actions.create, UserDto)
   async create(@Body() dto: CreateUserDto): Promise<UserDto> {
-    const doc = await this.usersService.create(dto);
+    const doc = await this.userService.create(dto);
     return plainToInstance(UserDto, doc, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
@@ -35,7 +35,7 @@ export class UsersController {
   @Get()
   @UseAbility(Actions.read, UserDto)
   async findAll(): Promise<UserDto[]> {
-    const docs = await this.usersService.findAll();
+    const docs = await this.userService.findAll();
 
     return plainToInstance(UserDto, docs, {
       excludeExtraneousValues: true,
@@ -46,7 +46,7 @@ export class UsersController {
   @Get(':id')
   @UseAbility(Actions.read, UserDto)
   async findOne(@Param('id') id: string): Promise<UserDto> {
-    const doc = await this.usersService.findOne(id);
+    const doc = await this.userService.findOne(id);
 
     return plainToInstance(UserDto, doc, {
       excludeExtraneousValues: true,
@@ -60,7 +60,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
   ): Promise<UserDto> {
-    const doc = await this.usersService.update(id, dto);
+    const doc = await this.userService.update(id, dto);
 
     return plainToInstance(UserDto, doc, {
       excludeExtraneousValues: true,
@@ -71,6 +71,6 @@ export class UsersController {
   @Delete(':id')
   @UseAbility(Actions.delete, UserDto)
   async delete(@Param('id') id: string): Promise<Response> {
-    return await this.usersService.delete(id);
+    return await this.userService.delete(id);
   }
 }

@@ -12,7 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'src/types/Response';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}

@@ -12,7 +12,7 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { Response } from 'src/types/Response';
 
 @Injectable()
-export class BooksService {
+export class BookService {
   constructor(
     @InjectModel(Book.name) private readonly bookModel: Model<BookDocument>,
   ) {}

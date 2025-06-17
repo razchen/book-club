@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { BookClubsService } from './book-clubs.service';
+import { BookClubService } from './book-club.service';
 import { CreateBookClubDto } from './dto/create-book-club.dto';
 import { UpdateBookClubDto } from './dto/update-book-club.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -26,7 +26,7 @@ import { BookClubSubjectDto } from './dto/book-club-subject.dto';
 @UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)
 export class BookClubsController {
-  constructor(private readonly bookClubsService: BookClubsService) {}
+  constructor(private readonly bookClubService: BookClubService) {}
 
   @Post()
   async create(
@@ -34,14 +34,14 @@ export class BookClubsController {
     @Request() req: RequestWithUser,
   ) {
     const userId: string = req.user.id;
-    return this.bookClubsService.create(dto, userId);
+    return this.bookClubService.create(dto, userId);
   }
 
   @UseGuards(AccessGuard)
   @UseAbility(Actions.read, BookClubDto)
   @Get()
   async findAll() {
-    const docs = await this.bookClubsService.findAll();
+    const docs = await this.bookClubService.findAll();
 
     return plainToInstance(BookClubDto, docs, {
       excludeExtraneousValues: true,
@@ -51,7 +51,7 @@ export class BookClubsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const doc = await this.bookClubsService.findOne(id);
+    const doc = await this.bookClubService.findOne(id);
 
     return plainToInstance(BookClubDto, doc, {
       excludeExtraneousValues: true,
@@ -63,7 +63,7 @@ export class BookClubsController {
   @UseGuards(AccessGuard)
   @UseAbility(Actions.update, BookClubSubjectDto, BookClubHook)
   async update(@Param('id') id: string, @Body() dto: UpdateBookClubDto) {
-    const doc = await this.bookClubsService.update(id, dto);
+    const doc = await this.bookClubService.update(id, dto);
 
     return plainToInstance(BookClubDto, doc, {
       excludeExtraneousValues: true,
@@ -73,14 +73,14 @@ export class BookClubsController {
 
   @Delete(':id')
   async delete(@Param('id') id: string) {
-    return this.bookClubsService.delete(id);
+    return this.bookClubService.delete(id);
   }
 
   @Post(':id/add-book/:bookId')
   @UseGuards(AccessGuard)
   @UseAbility(Actions.update, BookClubSubjectDto, BookClubHook)
   async addBook(@Param('id') id: string, @Param('bookId') bookId: string) {
-    const doc = await this.bookClubsService.addBook(id, bookId);
+    const doc = await this.bookClubService.addBook(id, bookId);
 
     return plainToInstance(BookClubDto, doc, {
       excludeExtraneousValues: true,
@@ -92,7 +92,7 @@ export class BookClubsController {
   @UseGuards(AccessGuard)
   @UseAbility(Actions.update, BookClubSubjectDto, BookClubHook)
   async removeBook(@Param('id') id: string, @Param('bookId') bookId: string) {
-    const doc = await this.bookClubsService.removeBook(id, bookId);
+    const doc = await this.bookClubService.removeBook(id, bookId);
 
     return plainToInstance(BookClubDto, doc, {
       excludeExtraneousValues: true,
@@ -103,7 +103,7 @@ export class BookClubsController {
   @Post(':id/add-user')
   async addUser(@Param('id') id: string, @Request() req: RequestWithUser) {
     const userId: string = req.user.id;
-    const doc = await this.bookClubsService.addUser(id, userId);
+    const doc = await this.bookClubService.addUser(id, userId);
 
     return plainToInstance(BookClubDto, doc, {
       excludeExtraneousValues: true,
@@ -114,7 +114,7 @@ export class BookClubsController {
   @Delete(':id/remove-user')
   async removeUser(@Param('id') id: string, @Request() req: RequestWithUser) {
     const userId: string = req.user.id;
-    const doc = await this.bookClubsService.removeUser(id, userId);
+    const doc = await this.bookClubService.removeUser(id, userId);
 
     return plainToInstance(BookClubDto, doc, {
       excludeExtraneousValues: true,

@@ -8,7 +8,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { BooksService } from './books.service';
+import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -18,13 +18,13 @@ import { AccessGuard, Actions, UseAbility } from 'nest-casl';
 
 @Controller('books')
 @UseGuards(JwtAuthGuard, AccessGuard)
-export class BooksController {
-  constructor(private booksService: BooksService) {}
+export class BookController {
+  constructor(private bookService: BookService) {}
 
   @Post()
   @UseAbility(Actions.create, BookDto)
   async create(@Body() dto: CreateBookDto) {
-    const doc = await this.booksService.create(dto);
+    const doc = await this.bookService.create(dto);
 
     return plainToInstance(BookDto, doc, {
       excludeExtraneousValues: true,
@@ -34,7 +34,7 @@ export class BooksController {
   @Get()
   @UseAbility(Actions.read, BookDto)
   async findAll() {
-    const doc = await this.booksService.findAll();
+    const doc = await this.bookService.findAll();
     return plainToInstance(BookDto, doc, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
@@ -44,7 +44,7 @@ export class BooksController {
   @Get(':id')
   @UseAbility(Actions.read, BookDto)
   async findOne(@Param('id') id: string) {
-    const doc = await this.booksService.findOne(id);
+    const doc = await this.bookService.findOne(id);
     return plainToInstance(BookDto, doc, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
@@ -54,7 +54,7 @@ export class BooksController {
   @Patch(':id')
   @UseAbility(Actions.update, BookDto)
   async update(@Param('id') id: string, @Body() dto: UpdateBookDto) {
-    const doc = await this.booksService.update(id, dto);
+    const doc = await this.bookService.update(id, dto);
 
     return plainToInstance(BookDto, doc, {
       excludeExtraneousValues: true,
@@ -65,6 +65,6 @@ export class BooksController {
   @Delete(':id')
   @UseAbility(Actions.delete, BookDto)
   async delete(@Param('id') id: string) {
-    return this.booksService.delete(id);
+    return this.bookService.delete(id);
   }
 }

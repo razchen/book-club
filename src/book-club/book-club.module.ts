@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BookClubsController } from './book-club.controller';
-import { BookClubsService } from './book-clubs.service';
+import { BookClubService } from './book-club.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BookClub, BookClubSchema } from './schema/book-club.schema';
 import {
@@ -13,7 +13,7 @@ import { permissions } from './book-club.permission';
 
 @Module({
   controllers: [BookClubsController],
-  providers: [BookClubsService],
+  providers: [BookClubService],
   imports: [
     CaslModule.forFeature({ permissions }),
     MongooseModule.forFeature([
@@ -23,4 +23,4 @@ import { permissions } from './book-club.permission';
     ]),
   ],
 })
-export class BookClubsModule {}
+export class BookClubModule {}

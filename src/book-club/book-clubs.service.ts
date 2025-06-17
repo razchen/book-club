@@ -3,7 +3,6 @@ import { BookClub, BookClubDocument } from './schema/book-club.schema';
 import { Model, Types } from 'mongoose';
 import { CreateBookClubDto } from './dto/create-book-club.dto';
 import {
-  BadRequestException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -15,12 +14,7 @@ import {
   BookClubBook,
   BookClubBookDocument,
 } from './schema/book-club-book.schema';
-import { Book } from 'src/book/schema/book.schema';
 import { Membership, MembershipDocument } from './schema/membership.schema';
-
-type PopulatedBookClub = Omit<BookClub, 'books'> & {
-  books: Book[];
-};
 
 @Injectable()
 export class BookClubsService {
@@ -48,39 +42,44 @@ export class BookClubsService {
     }
   }
 
-  async findAll(): Promise<PopulatedBookClub[]> {
+  async findAll(): Promise<BookClub[]> {
     try {
-      const bookClubs = await this.bookClubModel
+      const clubs = await this.bookClubModel
         .find()
+        .populate('owner')
         .populate({
           path: 'books',
-          populate: { path: 'book' },
+          populate: { path: 'book', model: 'Book' },
         })
         .populate({
           path: 'users',
-          populate: { path: 'user' },
+          populate: { path: 'user', model: 'User' },
         });
 
-      return bookClubs.map((club) => {
-        const c = club.toObject() as unknown as BookClub & {
-          books: { book: Book }[];
-        };
+      console.log('clubs', JSON.stringify(clubs));
 
-        return {
-          ...c,
-          books: c.books.map((b) => b.book),
-        };
-      });
+      return clubs;
     } catch {
       throw new InternalServerErrorException('Failed to fetch book clubs');
     }
   }
 
-  async findOne(id: string): Promise<BookClubDocument> {
+  async findOne(id: string, populate = true): Promise<BookClubDocument | null> {
     try {
-      const bookClub = await this.bookClubModel.findById(id);
+      let q = this.bookClubModel.findById(id);
 
-      if (!bookClub) throw new NotFoundException();
+      if (populate) {
+        q = q.populate('owner').populate({
+          path: 'books',
+          populate: { path: 'book', model: 'Book' },
+        });
+      }
+
+      const bookClub = await q.exec();
+
+      if (!bookClub) {
+        throw new NotFoundException('Book club not found');
+      }
 
       return bookClub;
     } catch {
@@ -94,9 +93,12 @@ export class BookClubsService {
 
       if (!bookClub) throw new NotFoundException();
 
-      const updated = await this.bookClubModel.findByIdAndUpdate(id, dto, {
-        new: true,
-      });
+      const updated = await this.bookClubModel
+        .findByIdAndUpdate(id, dto, {
+          new: true,
+        })
+        .populate('owner')
+        .lean();
 
       if (!updated) throw new NotFoundException();
 
@@ -123,9 +125,9 @@ export class BookClubsService {
     }
   }
 
-  async addBook(bookClubId: string, bookId: string): Promise<BookClub> {
+  async addBook(bookClubId: string, bookId: string): Promise<BookClubDocument> {
     try {
-      const bookClub = await this.bookClubModel.findById(bookClubId);
+      const bookClub = await this.bookClubModel.findById(bookClubId).exec();
 
       if (!bookClub) throw new NotFoundException();
 
@@ -150,8 +152,7 @@ export class BookClubsService {
       }
 
       return bookClubUpdated;
-    } catch (err) {
-      console.error(err);
+    } catch {
       throw new InternalServerErrorException('Failed to add book');
     }
   }

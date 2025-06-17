@@ -2,6 +2,8 @@ import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { loginDto } from './dto/login.dto';
 import { registerDto } from './dto/register.dto';
+import { UserDto } from 'src/user/dto/user.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +23,11 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: registerDto) {
-    return await this.authService.register(dto);
+    const doc = await this.authService.register(dto);
+
+    return plainToInstance(UserDto, doc, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 }

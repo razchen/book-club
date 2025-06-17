@@ -4,7 +4,6 @@ import { User, UserDocument } from 'src/user/schema/user.schema';
 import { registerDto } from './dto/register.dto';
 import {
   BadRequestException,
-  Body,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -12,7 +11,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Role } from 'src/types/Auth';
+import { Roles } from 'src/app.roles';
 
 @Injectable()
 export class AuthService {
@@ -24,8 +23,10 @@ export class AuthService {
 
   login(user: UserDocument) {
     try {
-      const payload = { id: user._id, email: user.email, role: user.role };
+      const payload = { id: user._id, email: user.email, roles: user.roles };
       return {
+        id: user._id.toString(),
+        roles: user.roles,
         accessToken: this.jwtService.sign(payload, {
           secret: this.configService.get<string>('JWT_SECRET') || '',
         }),
@@ -39,7 +40,7 @@ export class AuthService {
     try {
       const user = await this.userModel
         .findOne({ email })
-        .select(['email', 'password', 'role']);
+        .select(['email', 'password', 'roles']);
 
       if (user && (await bcrypt.compare(password, user.password))) {
         return user;
@@ -65,7 +66,7 @@ export class AuthService {
       return await new this.userModel({
         ...dto,
         password: hashed,
-        role: Role.User,
+        roles: [Roles.user],
       }).save();
     } catch {
       throw new InternalServerErrorException('Registration failed');

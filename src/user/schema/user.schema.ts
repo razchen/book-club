@@ -10,7 +10,7 @@ export class User {
   name: string;
 
   @Prop({ required: true, default: Role.User })
-  role: Role;
+  roles: Role[];
 
   @Prop({ unique: true, required: true })
   email: string;

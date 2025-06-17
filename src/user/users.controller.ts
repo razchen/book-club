@@ -10,44 +10,66 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserDocument } from './schema/user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'src/types/Response';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Role } from 'src/types/Auth';
-import { Roles } from 'src/auth/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { AccessGuard, Actions, UseAbility } from 'nest-casl';
+import { UserDto } from './dto/user.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.Admin)
+@UseGuards(JwtAuthGuard, AccessGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async create(@Body() dto: CreateUserDto): Promise<UserDocument> {
-    return await this.usersService.create(dto);
+  @UseAbility(Actions.create, UserDto)
+  async create(@Body() dto: CreateUserDto): Promise<UserDto> {
+    const doc = await this.usersService.create(dto);
+    return plainToInstance(UserDto, doc, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get()
-  async findAll(): Promise<UserDocument[]> {
-    return await this.usersService.findAll();
+  @UseAbility(Actions.read, UserDto)
+  async findAll(): Promise<UserDto[]> {
+    const docs = await this.usersService.findAll();
+
+    return plainToInstance(UserDto, docs, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserDocument> {
-    return await this.usersService.findOne(id);
+  @UseAbility(Actions.read, UserDto)
+  async findOne(@Param('id') id: string): Promise<UserDto> {
+    const doc = await this.usersService.findOne(id);
+
+    return plainToInstance(UserDto, doc, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Patch(':id')
+  @UseAbility(Actions.update, UserDto)
   async update(
     @Param('id') id: string,
-    dto: UpdateUserDto,
-  ): Promise<UserDocument> {
-    return await this.usersService.update(id, dto);
+    @Body() dto: UpdateUserDto,
+  ): Promise<UserDto> {
+    const doc = await this.usersService.update(id, dto);
+
+    return plainToInstance(UserDto, doc, {
+      excludeExtraneousValues: true,
+      enableCircularCheck: true,
+    });
   }
 
   @Delete(':id')
+  @UseAbility(Actions.delete, UserDto)
   async delete(@Param('id') id: string): Promise<Response> {
     return await this.usersService.delete(id);
   }

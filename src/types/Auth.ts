@@ -6,7 +6,7 @@ export enum Role {
 export type JwtPayload = {
   id: string;
   email: string;
-  role: Role;
+  roles: Role[];
 };
 
 export type RequestWithPayload = {

@@ -15,6 +15,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { plainToInstance } from 'class-transformer';
 import { BookDto } from './dto/book.dto';
 import { AccessGuard, Actions, UseAbility } from 'nest-casl';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('books')
 @UseGuards(JwtAuthGuard, AccessGuard)
@@ -43,7 +44,7 @@ export class BookController {
 
   @Get(':id')
   @UseAbility(Actions.read, BookDto)
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseObjectIdPipe) id: string) {
     const doc = await this.bookService.findOne(id);
     return plainToInstance(BookDto, doc, {
       excludeExtraneousValues: true,
@@ -53,7 +54,10 @@ export class BookController {
 
   @Patch(':id')
   @UseAbility(Actions.update, BookDto)
-  async update(@Param('id') id: string, @Body() dto: UpdateBookDto) {
+  async update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() dto: UpdateBookDto,
+  ) {
     const doc = await this.bookService.update(id, dto);
 
     return plainToInstance(BookDto, doc, {
@@ -64,7 +68,7 @@ export class BookController {
 
   @Delete(':id')
   @UseAbility(Actions.delete, BookDto)
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ParseObjectIdPipe) id: string) {
     return this.bookService.delete(id);
   }
 }

@@ -12,7 +12,7 @@ import { MulterError } from 'multer'; // Import MulterError
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  async catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
 

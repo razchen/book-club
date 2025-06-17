@@ -16,6 +16,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AccessGuard, Actions, UseAbility } from 'nest-casl';
 import { UserDto } from './dto/user.dto';
 import { plainToInstance } from 'class-transformer';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, AccessGuard)
@@ -45,7 +46,7 @@ export class UserController {
 
   @Get(':id')
   @UseAbility(Actions.read, UserDto)
-  async findOne(@Param('id') id: string): Promise<UserDto> {
+  async findOne(@Param('id', ParseObjectIdPipe) id: string): Promise<UserDto> {
     const doc = await this.userService.findOne(id);
 
     return plainToInstance(UserDto, doc, {
@@ -57,7 +58,7 @@ export class UserController {
   @Patch(':id')
   @UseAbility(Actions.update, UserDto)
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateUserDto,
   ): Promise<UserDto> {
     const doc = await this.userService.update(id, dto);
@@ -70,7 +71,7 @@ export class UserController {
 
   @Delete(':id')
   @UseAbility(Actions.delete, UserDto)
-  async delete(@Param('id') id: string): Promise<Response> {
+  async delete(@Param('id', ParseObjectIdPipe) id: string): Promise<Response> {
     return await this.userService.delete(id);
   }
 }

@@ -43,9 +43,8 @@ export class BookClubService {
       .populate({
         path: 'users',
         populate: { path: 'user', model: 'User' },
-      });
-
-    console.log('clubs', JSON.stringify(clubs));
+      })
+      .exec();
 
     return clubs;
   }

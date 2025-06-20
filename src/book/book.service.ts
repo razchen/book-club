@@ -17,7 +17,7 @@ export class BookService {
   }
 
   async findAll(): Promise<BookDocument[]> {
-    return await this.bookModel.find();
+    return await this.bookModel.find().exec();
   }
 
   async findOne(id: string): Promise<BookDocument | null> {

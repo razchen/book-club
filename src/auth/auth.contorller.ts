@@ -1,9 +1,17 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { loginDto } from './dto/login.dto';
 import { registerDto } from './dto/register.dto';
-import { UserDto } from 'src/user/dto/user.dto';
-import { plainToInstance } from 'class-transformer';
+import { RefreshDto } from './dto/refresh.dto';
+import { RequestWithUser } from 'src/types/Auth';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -25,9 +33,13 @@ export class AuthController {
   async register(@Body() dto: registerDto) {
     const doc = await this.authService.register(dto);
 
-    return plainToInstance(UserDto, doc, {
-      excludeExtraneousValues: true,
-      enableImplicitConversion: true,
-    });
+    return doc;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('refresh')
+  async refresh(@Body() dto: RefreshDto, @Request() req: RequestWithUser) {
+    const { id } = req.user;
+    return this.authService.refresh(id, dto);
   }
 }

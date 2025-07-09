@@ -9,7 +9,8 @@ import { Response } from 'src/types/Response';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
   ) {}
 
   async create(dto: CreateUserDto): Promise<UserDocument> {
